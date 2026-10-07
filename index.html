@@ -1,0 +1,1323 @@
+<title>VEYA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single phone-width app column, sticky day header, fixed bottom tab bar.
+   Each domain carries its own hue; pine green is the app's own accent. */
+:root{
+  --bg:#EAEEE7; --surface:#FFFFFF; --surface-2:#F3F6F0; --line:#D5DCD0;
+  --fg:#16231C; --fg-2:#5C6B61; --fg-3:#8B9890;
+  --accent:#2E6B52; --accent-soft:#DCEBE1; --on-accent:#F2F7F1;
+  --move:#C2512C; --move-soft:#F7E4DB;
+  --eat:#3C7A41; --eat-soft:#E0EFDF;
+  --recover:#5A5AA4; --recover-soft:#E3E3F4;
+  --cycle:#B14870; --cycle-soft:#F7E0E8;
+  --reward:#A9741A; --reward-soft:#F6E9CF;
+  --shadow:0 1px 2px rgba(22,35,28,.06), 0 8px 24px -12px rgba(22,35,28,.18);
+  --d:'Bricolage Grotesque', 'Trebuchet MS', sans-serif;
+  --b:'Public Sans', -apple-system, 'Segoe UI', sans-serif;
+  --m:'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F1612; --surface:#18211B; --surface-2:#1E2922; --line:#2B372F;
+  --fg:#E7EEE6; --fg-2:#9AA99E; --fg-3:#76857B;
+  --accent:#74C69D; --accent-soft:#1D3328; --on-accent:#0C1710;
+  --move:#E98156; --move-soft:#36201A;
+  --eat:#7FBD79; --eat-soft:#1C2E1D;
+  --recover:#9A9AE2; --recover-soft:#232340;
+  --cycle:#E7819F; --cycle-soft:#3A2029;
+  --reward:#DCAC4C; --reward-soft:#332710;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F1612; --surface:#18211B; --surface-2:#1E2922; --line:#2B372F;
+  --fg:#E7EEE6; --fg-2:#9AA99E; --fg-3:#76857B;
+  --accent:#74C69D; --accent-soft:#1D3328; --on-accent:#0C1710;
+  --move:#E98156; --move-soft:#36201A;
+  --eat:#7FBD79; --eat-soft:#1C2E1D;
+  --recover:#9A9AE2; --recover-soft:#232340;
+  --cycle:#E7819F; --cycle-soft:#3A2029;
+  --reward:#DCAC4C; --reward-soft:#332710;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:var(--b); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
+
+.app{max-width:460px;margin:0 auto;padding:0 16px 120px;position:relative}
+.topbar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
+  background:linear-gradient(var(--bg) 72%, transparent);
+  padding-block:14px 10px; display:flex; align-items:center; gap:10px;
+}
+.topbar .date{font-family:var(--m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3)}
+.topbar h1{font-family:var(--d);font-weight:800;font-size:21px;margin:1px 0 0;letter-spacing:-.02em}
+.spacer{flex:1}
+.ptschip{
+  display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:6px 11px;font-family:var(--m);font-size:12.5px;box-shadow:var(--shadow)
+}
+.ptschip b{color:var(--reward);font-weight:500}
+
+[hidden]{display:none!important}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-family:var(--m);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3)}
+h2.sec{font-family:var(--d);font-weight:700;font-size:17px;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h3{font-family:var(--d);font-weight:700;font-size:15.5px;margin:0;letter-spacing:-.01em;text-wrap:balance}
+p.lede{margin:0;color:var(--fg-2);font-size:14px}
+.muted{color:var(--fg-2);font-size:13px;margin:0}
+.tiny{font-size:12px;color:var(--fg-3);margin:0}
+
+/* ---- check-in ---- */
+.qtitle{font-family:var(--d);font-weight:700;font-size:23px;line-height:1.2;letter-spacing:-.025em;margin:2px 0 14px;text-wrap:balance}
+.field{margin-top:14px}
+.field > .eyebrow{display:block;margin-bottom:7px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{
+  border:1px solid var(--line);background:var(--surface-2);border-radius:999px;
+  padding:7px 12px;font-size:13.5px;transition:background .15s,border-color .15s,color .15s
+}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:500}
+.energy{display:flex;gap:6px}
+.bat{flex:1;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font-family:var(--m);font-size:11px;color:var(--fg-3);
+  position:relative;overflow:hidden}
+.bat span{position:relative;z-index:1}
+.bat::before{content:"";position:absolute;inset:auto 0 0 0;height:0;background:var(--accent-soft);transition:height .2s}
+.bat[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.bat[aria-pressed="true"]::before{height:100%}
+.btn{
+  border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);
+  border-radius:12px;padding:12px 16px;font-weight:600;font-size:14.5px;width:100%;
+  display:flex;align-items:center;justify-content:center;gap:8px
+}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.btn.sm{padding:9px 13px;font-size:13.5px;width:auto;border-radius:10px}
+
+/* ---- capacity ---- */
+.cap{display:flex;align-items:center;gap:16px}
+.ring{width:84px;height:84px;flex:none;position:relative}
+.ring svg{display:block;transform:rotate(-90deg)}
+.ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.ring .num b{font-family:var(--d);font-weight:800;font-size:23px;line-height:1;letter-spacing:-.03em}
+.ring .num i{font-style:normal;font-family:var(--m);font-size:9px;letter-spacing:.1em;color:var(--fg-3);text-transform:uppercase}
+.tier{font-family:var(--d);font-weight:800;font-size:20px;letter-spacing:-.02em;margin:0;text-transform:lowercase}
+.why{margin:5px 0 0;font-size:13px;color:var(--fg-2)}
+
+/* ---- plan rows ---- */
+.plan{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.prow{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);
+  border-radius:16px;padding:13px 14px;box-shadow:var(--shadow);text-align:left;width:100%}
+.prow .dot{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center}
+.prow .dot svg{width:18px;height:18px}
+.prow .bd{flex:1;min-width:0}
+.prow .kind{font-family:var(--m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3)}
+.prow .ttl{font-family:var(--d);font-weight:700;font-size:15px;margin:1px 0 2px;letter-spacing:-.01em}
+.prow .sub{font-size:12.5px;color:var(--fg-2);margin:0}
+.prow .go{align-self:center;color:var(--fg-3);flex:none}
+.d-move{background:var(--move-soft);color:var(--move)}
+.d-eat{background:var(--eat-soft);color:var(--eat)}
+.d-recover{background:var(--recover-soft);color:var(--recover)}
+.d-cycle{background:var(--cycle-soft);color:var(--cycle)}
+.d-reward{background:var(--reward-soft);color:var(--reward)}
+
+/* ---- workout ---- */
+.wk{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:14px;box-shadow:var(--shadow)}
+.wk .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+.tag{font-family:var(--m);font-size:11px;padding:3px 8px;border-radius:7px;background:var(--surface-2);color:var(--fg-2);border:1px solid var(--line)}
+.tag.hot{background:var(--move-soft);color:var(--move);border-color:transparent}
+.blocks{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:0}
+.blocks li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px;align-items:baseline}
+.blocks li .t{font-family:var(--m);font-size:12px;color:var(--fg-3);flex:none;width:46px;font-variant-numeric:tabular-nums}
+.blocks li .n{flex:1;min-width:0}
+.blocks li .c{color:var(--fg-3);font-size:12px;display:block}
+
+/* player */
+.player{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 18px) 18px calc(env(safe-area-inset-bottom,0px) + 18px)}
+.player .inner{max-width:420px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column}
+.pdots{display:flex;gap:4px;margin-bottom:auto}
+.pdots i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.pdots i.on{background:var(--move)}
+.pdots i.now{background:var(--move);opacity:.55}
+.pbig{text-align:center;padding:10px 0}
+.pbig .step{font-family:var(--m);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3)}
+.pbig h2{font-family:var(--d);font-weight:800;font-size:28px;letter-spacing:-.03em;margin:8px 0 6px;text-wrap:balance}
+.pbig .cue{color:var(--fg-2);font-size:14px;margin:0 auto;max-width:34ch}
+.clock{font-family:var(--m);font-size:64px;font-weight:500;text-align:center;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;margin:18px 0;color:var(--move)}
+.pctrl{display:flex;gap:10px;margin-top:auto}
+.pctrl .btn{flex:1}
+
+/* ---- eat ---- */
+.search{display:flex;gap:8px}
+.search input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);
+  border-radius:12px;padding:11px 13px;font:inherit;font-size:14px}
+.foods{list-style:none;margin:10px 0 0;padding:0;max-height:330px;overflow-y:auto;display:flex;flex-direction:column}
+.foods li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.foods li:first-child{border-top:0}
+.foods .fn{flex:1;min-width:0;font-size:14px}
+.foods .fn small{display:block;color:var(--fg-3);font-family:var(--m);font-size:11px;font-variant-numeric:tabular-nums}
+.add{border:1px solid var(--line);background:var(--surface-2);border-radius:9px;width:32px;height:32px;flex:none;
+  display:grid;place-items:center;font-size:17px;line-height:1;color:var(--eat)}
+.fimg{width:42px;height:42px;border-radius:12px;flex:none;display:grid;place-items:center;
+  font-size:23px;line-height:1;user-select:none}
+.fi-veg{background:var(--eat-soft);color:var(--eat)}
+.fi-egg{background:var(--reward-soft);color:var(--reward)}
+.fi-nonveg{background:var(--move-soft);color:var(--move)}
+.ownin{width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);
+  border-radius:12px;padding:11px 13px;font:inherit;font-size:14px}
+.mine{font-family:var(--m);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--eat);
+  border:1px solid var(--eat);border-radius:5px;padding:1px 4px;margin-left:6px;vertical-align:1px}
+.del{border:0;background:none;color:var(--fg-3);font-size:15px;line-height:1;padding:0 2px;flex:none}
+.bars{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.bar b{font-family:var(--m);font-weight:500;font-size:12px;display:flex;justify-content:space-between;
+  color:var(--fg-2);font-variant-numeric:tabular-nums}
+.bar .track{height:7px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin-top:5px}
+.bar .fill{height:100%;background:var(--eat);width:0;transition:width .35s}
+.bar.k .fill{background:var(--move)}
+.bar.r .fill{background:var(--reward)}
+.logged{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+.logged li{font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 9px;
+  display:flex;gap:7px;align-items:center}
+.logged button{background:none;border:0;padding:0;color:var(--fg-3);font-size:14px;line-height:1}
+.meal{border-top:1px solid var(--line);padding:11px 0;display:flex;gap:11px;align-items:flex-start}
+.meal:first-of-type{border-top:0}
+.meal .cost{font-family:var(--m);font-size:12px;color:var(--eat);flex:none;width:46px;font-variant-numeric:tabular-nums}
+.water{display:flex;gap:6px;margin-top:9px}
+.wtot{font-family:var(--m);font-size:12.5px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.water{flex-wrap:wrap}
+.glass{width:24px;height:32px;border-radius:5px 5px 9px 9px;border:1.5px solid var(--line);background:var(--surface-2);padding:0}
+.glass.on{background:var(--accent);border-color:var(--accent)}
+
+/* ---- recover ---- */
+.breather{display:grid;place-items:center;padding:16px 0 6px}
+.orb{width:168px;height:168px;border-radius:50%;background:var(--recover-soft);border:1.5px solid var(--recover);
+  display:grid;place-items:center;transform:scale(.62);transition:transform 4s cubic-bezier(.4,0,.5,1)}
+.orb span{font-family:var(--d);font-weight:700;font-size:16px;color:var(--recover);letter-spacing:-.01em}
+@media (prefers-reduced-motion: reduce){ .orb{transition:none} }
+.jtxt{width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);border-radius:12px;
+  padding:11px 13px;font:inherit;font-size:14px;min-height:92px;resize:vertical;margin-top:9px}
+.entry{border-top:1px solid var(--line);padding:10px 0;font-size:13.5px}
+.entry .when{font-family:var(--m);font-size:11px;color:var(--fg-3);display:block}
+
+/* ---- cycle ---- */
+.phase{display:flex;gap:4px;margin-top:12px}
+.phase div{flex:1;text-align:center}
+.phase .pb{height:6px;border-radius:3px;background:var(--surface-2);border:1px solid var(--line)}
+.phase .pl{font-family:var(--m);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-3);margin-top:6px;display:block}
+.phase div.on .pb{background:var(--cycle);border-color:var(--cycle)}
+.phase div.on .pl{color:var(--cycle)}
+.row2{display:flex;gap:10px}
+.row2 label{flex:1;min-width:0}
+.row2 input{width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);border-radius:10px;
+  padding:9px 10px;font:inherit;font-size:13.5px}
+.sw{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.toggle{width:46px;height:27px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);position:relative;flex:none;padding:0}
+.toggle::after{content:"";position:absolute;top:2.5px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--fg-3);transition:transform .18s,background .18s}
+.toggle[aria-pressed="true"]{background:var(--cycle);border-color:var(--cycle)}
+.toggle[aria-pressed="true"]::after{transform:translateX(18px);background:#fff}
+
+/* ---- rewards ---- */
+.pts{display:flex;align-items:baseline;gap:9px}
+.pts b{font-family:var(--d);font-weight:800;font-size:40px;letter-spacing:-.04em;color:var(--reward);line-height:1}
+.chal{border-top:1px solid var(--line);padding:12px 0}
+.chal .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.chal .top b{font-size:14px;font-weight:600}
+.chal .top span{font-family:var(--m);font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums;flex:none}
+.chal .track{height:6px;border-radius:3px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin-top:8px}
+.chal .fill{height:100%;background:var(--reward);width:0;transition:width .4s}
+.chal.done .fill{background:var(--accent)}
+.unlock{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+.unlock .lk{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--surface-2);color:var(--fg-3);font-size:13px}
+.unlock.got .lk{background:var(--reward-soft);color:var(--reward)}
+.unlock.got .nm{color:var(--fg)}
+.unlock .nm{font-weight:600;font-size:14px;color:var(--fg-3)}
+.streak{display:flex;gap:5px;margin-top:10px}
+.streak i{flex:1;height:30px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);
+  display:grid;place-items:center;font-family:var(--m);font-size:10px;color:var(--fg-3);font-style:normal}
+.streak i.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+/* ---- nav ---- */
+.nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,460px);z-index:40;
+  background:var(--surface);border-top:1px solid var(--line);
+  padding:7px 6px calc(env(safe-area-inset-bottom,0px) + 7px);
+  display:flex;gap:2px;box-shadow:0 -8px 24px -18px rgba(0,0,0,.5)
+}
+.nav button{flex:1;min-width:0;border:0;background:none;padding:5px 2px;border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--fg-3);font-size:9.5px;font-weight:500;letter-spacing:.01em}
+.nav button svg{width:21px;height:21px}
+.nav button[aria-selected="true"]{color:var(--accent)}
+.toast{position:fixed;left:50%;transform:translate(-50%,16px);bottom:calc(env(safe-area-inset-bottom,0px) + 78px);
+  background:var(--fg);color:var(--bg);padding:10px 15px;border-radius:12px;font-size:13.5px;z-index:70;
+  opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div>
+      <div class="date" id="today"></div>
+      <h1 id="greet">Good morning</h1>
+    </div>
+    <div class="spacer"></div>
+    <div class="ptschip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--reward)"><path d="M12 3l2.5 5.3 5.5.8-4 4 1 5.9L12 16.2 7 19l1-5.9-4-4 5.5-.8z"/></svg><b id="ptsTop">0</b></div>
+  </header>
+
+  <!-- ================= HOME ================= -->
+  <section id="v-home" class="stack">
+    <div class="card">
+      <div class="eyebrow">Daily check-in</div>
+      <p class="qtitle">What can you realistically do today?</p>
+
+      <div class="field">
+        <span class="eyebrow">Energy</span>
+        <div class="energy" id="energyRow"></div>
+      </div>
+
+      <div class="field">
+        <span class="eyebrow">Time you actually have</span>
+        <div class="chips" id="timeRow"></div>
+      </div>
+
+      <div class="field">
+        <span class="eyebrow">Mood</span>
+        <div class="chips" id="moodRow"></div>
+      </div>
+
+      <div class="field">
+        <span class="eyebrow">What you want from it</span>
+        <div class="chips" id="goalRow"></div>
+      </div>
+
+      <div class="field"><button class="btn" id="buildBtn">Build my day</button></div>
+    </div>
+
+    <div class="card">
+      <div class="cap">
+        <div class="ring">
+          <svg width="84" height="84" viewBox="0 0 84 84">
+            <circle cx="42" cy="42" r="35" fill="none" stroke="var(--surface-2)" stroke-width="9"></circle>
+            <circle id="capArc" cx="42" cy="42" r="35" fill="none" stroke="var(--accent)" stroke-width="9"
+              stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="transition:stroke-dashoffset .5s"></circle>
+          </svg>
+          <div class="num"><b id="capNum">0</b><i>capacity</i></div>
+        </div>
+        <div style="min-width:0">
+          <div class="eyebrow">Today reads as</div>
+          <p class="tier" id="capTier">steady</p>
+          <p class="why" id="capWhy"></p>
+        </div>
+      </div>
+      <div class="plan" id="planRows"></div>
+    </div>
+
+    <div class="card" id="nudgeCard">
+      <div class="eyebrow">If today goes sideways</div>
+      <p class="muted" id="nudgeTxt" style="margin-top:6px"></p>
+    </div>
+  </section>
+
+  <!-- ================= MOVE ================= -->
+  <section id="v-move" class="stack" hidden>
+    <div class="card">
+      <div class="eyebrow">Matched to energy <span id="mE"></span> · <span id="mT"></span> min<span id="mC"></span></div>
+      <div id="wkHost" style="margin-top:10px"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn" id="startBtn" style="flex:2">Start session</button>
+        <button class="btn ghost sm" id="swapBtn" style="flex:1">Swap</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Other sessions that fit</h2>
+      <p class="tiny" style="margin-top:4px">Within your time, at or below today's intensity.</p>
+      <div id="altList" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- ================= EAT ================= -->
+  <section id="v-eat" class="stack" hidden>
+    <div class="card">
+      <div class="eyebrow">Today's intake</div>
+      <div class="bars" style="margin-top:10px">
+        <div class="bar k"><b><span>Energy</span><span id="kcalTxt">0 / 2000 kcal</span></b><div class="track"><div class="fill" id="kcalFill"></div></div></div>
+        <div class="bar"><b><span>Protein</span><span id="protTxt">0 / 60 g</span></b><div class="track"><div class="fill" id="protFill"></div></div></div>
+        <div class="bar r"><b><span>Spend</span><span id="costTxt">₹0</span></b><div class="track"><div class="fill" id="costFill"></div></div></div>
+      </div>
+      <ul class="logged" id="loggedList"></ul>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-top:16px;flex-wrap:wrap">
+        <span class="eyebrow">Water</span><span class="spacer"></span>
+        <span class="wtot" id="waterTot"></span>
+      </div>
+      <div class="water" id="waterRow"></div>
+      <p class="tiny" id="waterNote" style="margin-top:9px"></p>
+      <div class="chips" id="glassRow" style="margin-top:9px"></div>
+      <div class="chips" id="goalRow" style="margin-top:7px"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Log what you ate</h2>
+      <p class="tiny" style="margin:4px 0 10px">Estimates for one standard serving. Portions vary, so treat these as a guide.</p>
+      <div class="chips" id="dietRow" style="margin-bottom:10px"></div>
+      <div class="search">
+        <input id="foodQ" type="text" placeholder="Search poha, chicken, eggs…" autocomplete="off">
+        <button class="btn ghost sm" id="photoBtn">Photo</button>
+        <input id="photoIn" type="file" accept="image/*" hidden>
+      </div>
+      <p class="tiny" id="photoHint" hidden style="margin-top:8px"></p>
+      <ul class="foods" id="foodList"></ul>
+
+      <button class="btn ghost sm" id="ownBtn" style="margin-top:12px;width:100%">Not on the list? Add your own</button>
+      <div id="ownForm" hidden style="margin-top:12px">
+        <span class="eyebrow" style="display:block;margin-bottom:7px">Your dish</span>
+        <input class="ownin" id="ownName" type="text" placeholder="What did you eat?" autocomplete="off">
+        <div class="row2" style="margin-top:9px">
+          <label><span class="eyebrow" style="display:block;margin-bottom:5px">kcal</span><input id="ownK" type="number" min="0" max="3000" placeholder="300"></label>
+          <label><span class="eyebrow" style="display:block;margin-bottom:5px">Protein g</span><input id="ownP" type="number" min="0" max="200" placeholder="12"></label>
+          <label><span class="eyebrow" style="display:block;margin-bottom:5px">Cost ₹</span><input id="ownR" type="number" min="0" max="5000" placeholder="60"></label>
+        </div>
+        <div class="chips" id="ownDiet" style="margin-top:10px"></div>
+        <p class="tiny" style="margin-top:9px">Rough numbers are fine — the packet, the menu, or a guess. It saves to your list for next time.</p>
+        <div style="display:flex;gap:8px;margin-top:11px">
+          <button class="btn" id="ownSave" style="flex:2">Save and log it</button>
+          <button class="btn ghost sm" id="ownCancel" style="flex:1">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Cheap and quick, for the time you have</h2>
+      <p class="tiny" style="margin:4px 0 6px" id="mealWhy"></p>
+      <div id="mealList"></div>
+    </div>
+  </section>
+
+  <!-- ================= RECOVER ================= -->
+  <section id="v-recover" class="stack" hidden>
+    <div class="card">
+      <div class="eyebrow">Breathe</div>
+      <div class="chips" style="margin-top:9px" id="breathRow"></div>
+      <div class="breather"><div class="orb" id="orb"><span id="orbTxt">Ready</span></div></div>
+      <p class="tiny" id="breathNote" style="text-align:center;margin-bottom:10px"></p>
+      <button class="btn" id="breathBtn">Start — 6 rounds</button>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Sixty-second reset</h2>
+      <p class="muted" id="resetTxt" style="margin-top:6px"></p>
+      <button class="btn ghost sm" id="resetNew" style="margin-top:11px">Another one</button>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Journal</div>
+      <h3 style="margin-top:7px" id="prompt"></h3>
+      <textarea class="jtxt" id="jtxt" placeholder="A couple of lines is enough."></textarea>
+      <div style="display:flex;gap:8px;margin-top:9px">
+        <button class="btn sm" id="jSave" style="flex:1">Save entry</button>
+        <button class="btn ghost sm" id="jNew">New prompt</button>
+      </div>
+      <div id="entries" style="margin-top:6px"></div>
+    </div>
+  </section>
+
+  <!-- ================= CYCLE ================= -->
+  <section id="v-cycle" class="stack" hidden>
+    <div class="card">
+      <div class="sw">
+        <div style="min-width:0">
+          <div class="eyebrow">Cycle tracking</div>
+          <p class="muted" style="margin-top:3px">Feeds today's plan when it's on.</p>
+        </div>
+        <button class="toggle" id="cycToggle" aria-pressed="true" aria-label="Cycle tracking"></button>
+      </div>
+    </div>
+
+    <div id="cycBody" class="stack">
+      <div class="card">
+        <div class="eyebrow">Right now</div>
+        <h2 class="sec" id="phaseName" style="margin-top:5px;font-size:21px"></h2>
+        <p class="muted" id="phaseLine" style="margin-top:4px"></p>
+        <div class="phase" id="phaseBar"></div>
+        <p class="tiny" id="nextLine" style="margin-top:12px"></p>
+      </div>
+
+      <div class="card">
+        <h2 class="sec">What this phase usually asks for</h2>
+        <div id="phaseTips" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Your dates</div>
+        <p class="tiny" id="sampleNote" style="margin:4px 0 10px"></p>
+        <div class="row2">
+          <label><span class="eyebrow" style="display:block;margin-bottom:5px">Last period began</span><input type="date" id="cStart"></label>
+        </div>
+        <div class="row2" style="margin-top:9px">
+          <label><span class="eyebrow" style="display:block;margin-bottom:5px">Cycle length</span><input type="number" id="cLen" min="20" max="45"></label>
+          <label><span class="eyebrow" style="display:block;margin-bottom:5px">Period length</span><input type="number" id="cPer" min="2" max="10"></label>
+        </div>
+        <button class="btn sm" id="cSave" style="margin-top:11px;width:100%">Save dates</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REWARDS ================= -->
+  <section id="v-rewards" class="stack" hidden>
+    <div class="card">
+      <div class="eyebrow">Wellness points</div>
+      <div class="pts" style="margin-top:6px"><b id="ptsBig">0</b><span class="muted" id="ptsSince"></span></div>
+      <div class="streak" id="streakRow"></div>
+      <p class="tiny" style="margin-top:9px" id="streakTxt"></p>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">This week's challenges</h2>
+      <div id="chalList" style="margin-top:4px"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Unlocks</h2>
+      <p class="tiny" style="margin:4px 0 2px" id="nextUnlock"></p>
+      <div id="unlockList"></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Demo data</div>
+      <p class="muted" style="margin-top:5px">This app opens with a sample week so there's something to look at. Clear it to start from your own day one.</p>
+      <button class="btn ghost sm" id="resetAll" style="margin-top:11px;width:100%">Clear sample data</button>
+    </div>
+  </section>
+</div>
+
+<nav class="nav" id="nav" role="tablist"></nav>
+<div class="toast" id="toast"></div>
+<div class="player" id="player" hidden>
+  <div class="inner">
+    <div class="pdots" id="pdots"></div>
+    <div class="pbig">
+      <div class="step" id="pstep"></div>
+      <h2 id="pname"></h2>
+      <p class="cue" id="pcue"></p>
+    </div>
+    <div class="clock" id="pclock">00:00</div>
+    <div class="pctrl">
+      <button class="btn ghost" id="pEnd">End</button>
+      <button class="btn" id="pPause">Pause</button>
+      <button class="btn ghost" id="pSkip">Skip</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const el = (t,c,h) => { const n=document.createElement(t); if(c)n.className=c; if(h!=null)n.innerHTML=h; return n; };
+const ICON = {
+  home:'<path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  move:'<path d="M6 8v8M18 8v8M9 12h6M3 10v4M21 10v4"/>',
+  eat:'<path d="M6 3v8a2 2 0 0 0 4 0V3M8 11v10M17 3c-1.5 2-2 4-2 6s.5 3 2 3v9"/>',
+  recover:'<path d="M12 21s-7-4.5-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 3.5C19 16.5 12 21 12 21z"/>',
+  cycle:'<path d="M20 12a8 8 0 1 1-3-6.2M20 4v4h-4"/>',
+  reward:'<path d="M12 3l2.5 5.3 5.5.8-4 4 1 5.9L12 16.2 7 19l1-5.9-4-4 5.5-.8z"/>',
+  chev:'<path d="m9 6 6 6-6 6"/>'
+};
+const svg = (p,sz) => `<svg viewBox="0 0 24 24" width="${sz||20}" height="${sz||20}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+
+/* ---------------- state ---------------- */
+const DAY = 864e5;
+const iso = d => new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const TODAY = iso(new Date());
+
+const DEFAULT = () => ({
+  demo:true, day:TODAY,
+  energy:3, minutes:20, mood:'okay', goal:'any',
+  points:185, streakDays:4,
+  food:[], waterMl:750, glassMl:250, goalMl:2500, altIdx:0, diet:'all', myFoods:[],
+  cycle:{on:true, start:iso(new Date(Date.now()-17*DAY)), len:28, per:5},
+  journal:[{d:iso(new Date(Date.now()-DAY)), t:'Walked instead of the gym. Still counted.'}],
+  counters:{moves:2, breaths:3, journals:1, meals:4, water:2},
+  breath:'box'
+});
+let S = DEFAULT();
+try{
+  const raw = localStorage.getItem('capacity.v1');
+  if(raw){ const p = JSON.parse(raw); if(p && p.cycle) S = Object.assign(DEFAULT(), p); }
+}catch(e){}
+if(S.day !== TODAY){ S.day = TODAY; S.food = []; S.waterMl = 0; }
+if(typeof S.waterMl !== 'number'){ S.waterMl = (S.water || 0) * 250; }
+S.glassMl = S.glassMl || 250; S.goalMl = S.goalMl || 2500;
+const save = () => { try{ localStorage.setItem('capacity.v1', JSON.stringify(S)); }catch(e){} };
+
+let toastT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+function award(n, why){
+  S.points += n; save(); paintPoints();
+  toast(why + '  +' + n + ' pts');
+}
+
+/* ---------------- content ---------------- */
+const MOODS = [
+  {k:'drained', l:'Drained', m:-9}, {k:'tense', l:'Tense', m:-4},
+  {k:'flat', l:'Flat', m:-5}, {k:'okay', l:'Okay', m:0},
+  {k:'good', l:'Good', m:7}, {k:'wired', l:'Wired', m:2}
+];
+const TIMES = [10,20,30,45,60];
+const GOALS = [{k:'any',l:'Whatever fits'},{k:'mobility',l:'Loosen up'},{k:'strength',l:'Get stronger'},{k:'cardio',l:'Break a sweat'},{k:'calm',l:'Calm down'}];
+const TIERS = ['restore','steady','build','push'];
+
+const b = (n,s,c) => ({n, s, c});
+const W = [
+  {id:'unfurl', t:'restore', g:'mobility', min:10, name:'Bedside Unfurl', note:'Done sitting on the edge of the bed. No floor, no kit.',
+   bl:[b('Settle','60','Sit tall, feet flat, three slow breaths.'),b('Neck releases','90','Ear to shoulder, hold, swap. Jaw loose.'),b('Shoulder rolls','90','Big and slow, back then forward.'),b('Seated spine twist','120','Hand on opposite knee. Turn from the ribs.'),b('Hamstring reach','120','One leg out, hinge from the hip.'),b('Close','120','Eyes shut, lengthen the exhale.')]},
+  {id:'cramp', t:'restore', g:'calm', min:10, name:'Cramp-Kind Mobility', note:'Low to the ground. Nothing that presses on the belly.',
+   bl:[b('Child\'s pose','120','Knees wide, forehead down, breathe into the back.'),b('Supine twist','180','90 seconds each side. Let the knees fall.'),b('Cat–cow','120','Small and slow. Follow the breath.'),b('Legs up the wall','180','Arms out. Nothing to do here.')]},
+  {id:'legsup', t:'restore', g:'calm', min:10, name:'Legs-Up Reset', note:'For the end of a long standing day.',
+   bl:[b('Find the wall','60','Hips close, legs straight up.'),b('Settle','240','Count the exhale to six.'),b('Ankle pumps','120','Point and flex, twenty times.'),b('Roll out','180','Knees to chest, roll to one side, sit slowly.')]},
+  {id:'hipflow', t:'restore', g:'mobility', min:20, name:'Slow Hip Flow', note:'Twenty minutes, nothing above a stretch.',
+   bl:[b('Breath and set up','120','Lie down. Let the floor take the weight.'),b('90/90 switches','240','Slow, controlled, no hands if you can.'),b('Low lunge','300','2:30 each side. Tuck the back hip under.'),b('Pigeon or figure-four','300','Pick whichever your knees prefer.'),b('Happy baby','180','Rock gently side to side.'),b('Stillness','120','Nothing to achieve.')]},
+  {id:'wall', t:'steady', g:'mobility', min:20, name:'Spine and Shoulders', note:'All of it against a wall. Good after a desk day.',
+   bl:[b('Wall posture','120','Heels, hips, head touching. Breathe.'),b('Wall angels','180','Slow arms up and down, forearms on the wall.'),b('Thoracic opener','240','Hands high, chest through. Two sets.'),b('Wall sit','120','Thighs parallel if the knees agree.'),b('Chest stretch','180','Forearm on the frame, turn away.'),b('Neck and finish','180','Slow circles, then stand quietly.')]},
+  {id:'walk', t:'steady', g:'cardio', min:20, name:'Easy Walk Builder', note:'Outside if you can, corridor if you can\'t.',
+   bl:[b('Start soft','300','Easy pace. You could sing.'),b('Lift it','420','Brisk — you can talk, not sing.'),b('Pick-ups','240','30 seconds quick, 30 easy. Four rounds.'),b('Bring it down','240','Easy again. Shoulders drop.')]},
+  {id:'gentle', t:'steady', g:'strength', min:20, name:'Gentle Strength Circuit', note:'Bodyweight. Two rounds, no rush between them.',
+   bl:[b('Warm up','120','March, arm swings, ten squats.'),b('Squats','90','12 reps. Sit back, chest up.'),b('Incline push-ups','90','Hands on a table or bed. 10 reps.'),b('Glute bridge','90','15 reps, two-second squeeze at the top.'),b('Dead bug','90','10 each side. Ribs down.'),b('Round two','480','Same four, same order.'),b('Stretch','240','Quads, chest, hamstrings.')]},
+  {id:'floorA', t:'build', g:'strength', min:20, name:'Floor Strength A', note:'Three rounds. Rest where it says rest.',
+   bl:[b('Warm up','180','Jumping jacks, hip circles, ten squats.'),b('Squat to reach','60','15 reps, controlled.'),b('Push-ups','60','As many as stay clean.'),b('Reverse lunges','60','8 each leg.'),b('Hollow hold','45','Low back pressed down.'),b('Rest','60','Breathe through the nose.'),b('Rounds two and three','600','Same block, twice more.'),b('Cool down','180','Child\'s pose, hamstrings, chest.')]},
+  {id:'stairs', t:'build', g:'cardio', min:20, name:'Stair Intervals', note:'One flight is enough. Walk down, always.',
+   bl:[b('Warm up','240','Walk the flight twice, easy.'),b('Interval ×6','720','Up quick, down slow. That\'s one.'),b('Flush','240','Easy walking. Let the breath come back.')]},
+  {id:'carry', t:'build', g:'strength', min:30, name:'Core and Carry', note:'Grab two full water bottles or a loaded bag.',
+   bl:[b('Warm up','240','Hips, shoulders, ten squats.'),b('Goblet squat','90','12 reps, bag held at the chest.'),b('Suitcase carry','90','45 seconds a side. Don\'t lean.'),b('Row','90','Hinge forward, pull to the ribs. 12 reps.'),b('Side plank','60','30 seconds a side.'),b('Rest','60','Shake the arms out.'),b('Rounds two and three','780','Same five.'),b('Cool down','300','Hamstrings, lats, forearms.')]},
+  {id:'tempo', t:'build', g:'cardio', min:30, name:'Tempo Walk-Run', note:'Run the hard bits only if they feel available.',
+   bl:[b('Easy start','300','Loose shoulders, short steps.'),b('Build','300','Lift to brisk, hold it.'),b('Tempo ×4','960','3 minutes hard, 1 minute easy.'),b('Down','240','Easy, then walk the last minute.')]},
+  {id:'full45', t:'build', g:'strength', min:45, name:'Full Body Forty-Five', note:'Four blocks with real rest between them.',
+   bl:[b('Warm up','300','Joints first, then ten minutes of easy movement.'),b('Lower: squat + lunge','600','3 rounds of 12 and 8 each side.'),b('Upper: push + row','600','3 rounds, leave two in the tank.'),b('Core','420','Plank, dead bug, side plank. Three rounds.'),b('Finisher','300','20 seconds on, 40 off. Five rounds.'),b('Cool down','480','Full stretch. Don\'t skip this one.')]},
+  {id:'ladder', t:'push', g:'cardio', min:20, name:'Sweat Ladder', note:'Twenty minutes, nothing left over.',
+   bl:[b('Warm up','180','Get properly warm first.'),b('Ladder up','420','20s, 30s, 40s, 50s work. Equal rest.'),b('Ladder down','420','50s, 40s, 30s, 20s. Same rest.'),b('Flush','180','Walk it off, then breathe.')]},
+  {id:'power', t:'push', g:'strength', min:30, name:'Power Circuit', note:'Five moves, five rounds, one minute of rest.',
+   bl:[b('Warm up','300','Raise the heart rate before round one.'),b('Jump squats','40','Land quiet.'),b('Push-ups','40','Full range or hands elevated.'),b('Skater jumps','40','Side to side, stick the landing.'),b('Plank shoulder taps','40','Hips still.'),b('Rest','60','Count the breath down.'),b('Rounds two to five','900','Same order. Pace it.'),b('Cool down','300','Walk, then stretch.')]},
+  {id:'hills', t:'push', g:'cardio', min:30, name:'Hill Repeats', note:'A ramp, a bridge, or the steepest road nearby.',
+   bl:[b('Warm up','480','Eight easy minutes. Properly easy.'),b('Repeat ×8','960','60 seconds up hard, walk down.'),b('Cool down','360','Six minutes easy, then stretch calves.')]},
+  {id:'engine', t:'push', g:'cardio', min:60, name:'Engine Builder', note:'An hour, mostly conversational, with teeth in the middle.',
+   bl:[b('Warm up','600','Ten minutes, easy and boring.'),b('Steady block','1200','Twenty minutes you could hold all day.'),b('Hard block','900','5 minutes on, 2 easy. Three rounds.'),b('Steady again','600','Back to conversational.'),b('Cool down','300','Walk, breathe, stretch.')]}
+];
+
+const FOOD = [
+  {n:'Poha, one plate', k:270, p:6, r:25, t:'veg', e:'🍛'},
+  {n:'Idli ×2 with sambar', k:210, p:7, r:30, t:'veg', e:'🍘'},
+  {n:'Masala dosa', k:390, p:8, r:60, t:'veg', e:'🌯'},
+  {n:'Upma, one bowl', k:300, p:7, r:25, t:'veg', e:'🥣'},
+  {n:'Boiled eggs ×2', k:155, p:13, r:24, t:'egg', e:'🥚'},
+  {n:'Egg bhurji with 2 toast', k:380, p:19, r:45, t:'egg', e:'🥘'},
+  {n:'Omelette, 2 eggs', k:190, p:13, r:26, t:'egg', e:'🍳'},
+  {n:'Egg whites ×4, boiled', k:70, p:14, r:24, t:'egg', e:'🍥'},
+  {n:'Egg curry with 2 roti', k:450, p:20, r:60, t:'egg', e:'🫓'},
+  {n:'Egg fried rice', k:430, p:14, r:70, t:'egg', e:'🍚'},
+  {n:'Chicken curry, one cup', k:290, p:26, r:90, t:'nonveg', e:'🍗'},
+  {n:'Chicken biryani, one plate', k:560, p:28, r:140, t:'nonveg', e:'🍱'},
+  {n:'Grilled chicken, 150 g', k:250, p:46, r:110, t:'nonveg', e:'🍖'},
+  {n:'Tandoori chicken, 2 pieces', k:290, p:32, r:130, t:'nonveg', e:'🍢'},
+  {n:'Chicken shawarma roll', k:480, p:25, r:120, t:'nonveg', e:'🥙'},
+  {n:'Chicken soup, one bowl', k:110, p:9, r:60, t:'nonveg', e:'🍲'},
+  {n:'Fish curry, one piece', k:230, p:22, r:90, t:'nonveg', e:'🐟'},
+  {n:'Fish fry, 2 pieces', k:280, p:24, r:100, t:'nonveg', e:'🐠'},
+  {n:'Prawn masala, half cup', k:210, p:20, r:130, t:'nonveg', e:'🦐'},
+  {n:'Mutton curry, one cup', k:380, p:24, r:160, t:'nonveg', e:'🥩'},
+  {n:'Keema pav', k:420, p:21, r:90, t:'nonveg', e:'🍔'},
+  {n:'Peanut chaat, one cup', k:290, p:12, r:20, t:'veg', e:'🥜'},
+  {n:'Sprouts salad', k:160, p:10, r:18, t:'veg', e:'🥗'},
+  {n:'Curd rice, one bowl', k:330, p:9, r:30, t:'veg', e:'🍙'},
+  {n:'Rajma chawal', k:480, p:16, r:70, t:'veg', e:'🫘'},
+  {n:'Chana masala + 2 roti', k:520, p:19, r:65, t:'veg', e:'🧆'},
+  {n:'Paneer bhurji, half cup', k:300, p:17, r:70, t:'veg', e:'🧀'},
+  {n:'Oats with banana', k:310, p:9, r:28, t:'veg', e:'🍌'},
+  {n:'Peanut butter toast ×2', k:360, p:12, r:30, t:'veg', e:'🍞'},
+  {n:'Milk, one glass', k:150, p:8, r:22, t:'veg', e:'🥛'},
+  {n:'Roasted chana, 50 g', k:180, p:10, r:15, t:'veg', e:'🌰'},
+  {n:'Makhana, 30 g', k:105, p:3, r:30, t:'veg', e:'🍿'},
+  {n:'Buttermilk, one glass', k:60, p:3, r:15, t:'veg', e:'🥤'},
+  {n:'Instant noodles', k:380, p:8, r:20, t:'veg', e:'🍜'},
+  {n:'Veg fried rice', k:420, p:9, r:60, t:'veg', e:'🥡'},
+  {n:'Dal khichdi', k:400, p:14, r:40, t:'veg', e:'🫕'},
+  {n:'Soya chunk curry', k:290, p:24, r:35, t:'veg', e:'🥫'},
+  {n:'Fruit bowl', k:140, p:2, r:40, t:'veg', e:'🍉'},
+  {n:'Sattu drink', k:220, p:11, r:20, t:'veg', e:'🧃'},
+  {n:'Corn chaat', k:190, p:5, r:25, t:'veg', e:'🌽'},
+  {n:'Curd with jaggery', k:200, p:9, r:25, t:'veg', e:'🍮'},
+  {n:'Vada pav', k:300, p:6, r:20, t:'veg', e:'🥯'},
+  {n:'Filter coffee', k:90, p:3, r:15, t:'veg', e:'☕'}
+];
+
+
+/* emoji thumbnails; names fall through the rules so custom dishes get one too */
+const EMOJI_RULES = [
+  [/shawarma|roll|wrap|kathi/i,'🥙'], [/soup|rasam/i,'🍲'], [/biryani|pulao/i,'🍱'],
+  [/prawn|shrimp/i,'🦐'], [/fish|pomfret|surmai/i,'🐟'], [/mutton|lamb|keema/i,'🥩'],
+  [/chicken|tandoori/i,'🍗'], [/omelette/i,'🍳'], [/egg/i,'🥚'],
+  [/idli/i,'🍘'], [/dosa|uttapam/i,'🌯'], [/noodle|maggi|pasta/i,'🍜'],
+  [/pav|burger|bun|vada/i,'🥯'], [/toast|bread|sandwich/i,'🍞'],
+  [/roti|chapati|paratha|naan/i,'🫓'], [/coffee|chai|tea/i,'☕'],
+  [/milk|lassi|shake/i,'🥛'], [/buttermilk|juice|drink|sattu/i,'🥤'],
+  [/salad|sprout|greens|cucumber/i,'🥗'], [/makhana|popcorn/i,'🍿'],
+  [/peanut|nuts|almond|badam/i,'🥜'], [/chana|rajma|dal|beans/i,'🫘'],
+  [/corn/i,'🌽'], [/paneer|cheese|tofu/i,'🧀'], [/soya|curry|masala|sabzi/i,'🥘'],
+  [/curd|yogurt|dahi|raita/i,'🍮'], [/fruit|banana|apple|mango|papaya/i,'🍉'],
+  [/rice|chawal|khichdi|poha|upma/i,'🍚'], [/chaat|samosa|pakora/i,'🧆']
+];
+function emojiFor(f){
+  if(f.e) return f.e;
+  const hit = EMOJI_RULES.find(r => r[0].test(f.n));
+  return hit ? hit[1] : '🍽️';
+}
+function foodThumb(f){
+  return '<span class="fimg fi-'+(f.t||'veg')+'">'+emojiFor(f)+'</span>';
+}
+const DIETS = [{k:'all',l:'Everything'},{k:'veg',l:'Veg'},{k:'egg',l:'Egg'},{k:'nonveg',l:'Non-veg'}];
+
+const MEALS = [
+  {n:'Egg bhurji on toast', mins:8, r:45, how:'Two eggs, onion, chilli, turmeric. Scramble hard, pile on toast.', k:380, p:19},
+  {n:'Curd rice, done properly', mins:10, r:30, how:'Leftover rice, thick curd, salt. Temper mustard seeds and curry leaves on top.', k:330, p:9},
+  {n:'Sprouts and peanut chaat', mins:7, r:25, how:'Boiled sprouts, roasted peanuts, onion, tomato, lemon, chaat masala.', k:300, p:14},
+  {n:'Fifteen-minute khichdi', mins:15, r:40, how:'Half cup rice, half cup moong dal, turmeric, salt. Pressure cook three whistles.', k:400, p:14},
+  {n:'Oats, the savoury way', mins:9, r:28, how:'Oats cooked in water with onion, carrot, peas, and a pinch of sambar powder.', k:290, p:10},
+  {n:'Soya chunk stir-fry', mins:14, r:35, how:'Soak chunks in hot water, squeeze dry, fry with onion-tomato masala.', k:290, p:24},
+  {n:'Chana salad bowl', mins:6, r:30, how:'Tin or soaked chana, cucumber, onion, lemon, olive oil if you have it.', k:280, p:15},
+  {n:'Milk, banana, peanut butter', mins:3, r:40, how:'Blend, or just eat them one after the other. It counts.', k:390, p:15},
+  {n:'Pan tandoori chicken', mins:15, r:110, how:'Curd, chilli powder, ginger-garlic, salt. Marinate ten minutes, sear hard in a dry pan.', k:290, p:32},
+  {n:'Two-egg omelette, loaded', mins:6, r:30, how:'Onion, tomato, green chilli, coriander. Two eggs, one pan, done before the kettle boils.', k:220, p:14}
+];
+
+const RESETS = [
+  'Stand up. Unclench your jaw. Drop your shoulders an inch. Look at the furthest thing you can see for thirty seconds, then come back.',
+  'Name five things you can see, four you can hear, three you can feel. Say them out loud if you\'re alone.',
+  'Drink a full glass of water, slowly, doing nothing else. That\'s the whole exercise.',
+  'Write down the one thing you\'re actually worried about. Put a time tomorrow when you\'ll think about it. Close the note.',
+  'Open a window. Two minutes of outside air and no screen.',
+  'Press your feet into the floor, hard, for ten seconds. Release. Three times.'
+];
+const PROMPTS = [
+  'What took more out of you today than it should have?',
+  'Name one thing that went better than you expected.',
+  'What are you carrying that isn\'t actually yours?',
+  'If tomorrow had to be ten percent easier, what would you drop?',
+  'What did your body ask for today that you ignored?',
+  'Who did you not reply to, and is it still bothering you?',
+  'What\'s the smallest thing that would make tonight better?'
+];
+const BREATHS = {
+  box:  {l:'Steady Focus', seq:[['Inhale',4],['Hold',4],['Exhale',4],['Hold',4]], note:'Four counts each way. Settles the shake before a viva, an exam, a call.'},
+  calm: {l:'Calm 4·7·8',   seq:[['Inhale',4],['Hold',7],['Exhale',8]],            note:'Long exhale. For winding down at the end of the night.'},
+  lift: {l:'Study Boost',  seq:[['Inhale',6],['Exhale',2]],                        note:'Deep in, sharp out. Clears the fog before a study block.'}
+};
+const CHALLENGES = [
+  {k:'moves', l:'Three sessions this week', goal:3},
+  {k:'breaths', l:'Breathe on four days', goal:4},
+  {k:'meals', l:'Log six meals', goal:6},
+  {k:'journals', l:'Two journal entries', goal:2}
+];
+const UNLOCKS = [
+  {at:100, n:'Swap any suggestion', d:'Cycle through every session that fits your day.'},
+  {at:250, n:'Forty-five minute sessions', d:'Longer builds appear once the habit is holding.'},
+  {at:500, n:'Phase-aware plans', d:'Cycle data starts shaping intensity automatically.'},
+  {at:900, n:'Weekly recap card', d:'A single screen of what the week actually looked like.'}
+];
+
+/* ---------------- cycle ---------------- */
+function cycleInfo(){
+  const c = S.cycle;
+  if(!c.on) return null;
+  const start = new Date(c.start + 'T00:00:00');
+  if(isNaN(start)) return null;
+  const now = new Date(TODAY + 'T00:00:00');
+  let day = Math.floor((now - start)/DAY) % c.len;
+  if(day < 0) day += c.len;
+  day += 1;
+  const ov = Math.round(c.len - 14);
+  let phase;
+  if(day <= c.per) phase = 'menstrual';
+  else if(day < ov - 1) phase = 'follicular';
+  else if(day <= ov + 1) phase = 'ovulatory';
+  else phase = 'luteal';
+  const toNext = c.len - day + 1;
+  return {day, phase, toNext, len:c.len, per:c.per, ov};
+}
+const PHASE = {
+  menstrual:{l:'Menstrual', s:'Mens', mod:-7, tips:['Movement that doesn\'t compress the belly: walking, hip openers, floor work.','Iron matters this week — chana, sprouts, dates, leafy greens.','If energy is there, use it. If it isn\'t, this is not the week to argue.']},
+  follicular:{l:'Follicular', s:'Foll', mod:4, tips:['Energy usually climbs. Good window for harder sessions or something new.','Strength work tends to feel easier here.','Appetite is often steadier. Keep protein up while it is.']},
+  ovulatory:{l:'Ovulatory', s:'Ovul', mod:6, tips:['Often the strongest few days. Take the hard session if you want one.','Warm up properly — joints are a little looser than usual.','Sleep can get light. Keep the evening wind-down.']},
+  luteal:{l:'Pre-menstrual', s:'Pre', mod:-4, tips:['Steady beats intense. Tempo walks, moderate strength, longer warm-ups.','Cravings and hunger rise for real reasons. Eat enough; add magnesium-rich food.','Mood dips here are physiological. Lower the bar on purpose.']}
+};
+
+/* ---------------- engine ---------------- */
+function capacity(){
+  const mood = MOODS.find(m=>m.k===S.mood) || MOODS[3];
+  const tFac = {10:4, 20:8, 30:12, 45:16, 60:20}[S.minutes] || 8;
+  const ci = cycleInfo();
+  const cMod = ci ? PHASE[ci.phase].mod : 0;
+  let v = S.energy*14 + tFac + mood.m + cMod;
+  v = Math.max(8, Math.min(100, Math.round(v)));
+  let tier = v < 32 ? 'restore' : v < 55 ? 'steady' : v < 76 ? 'build' : 'push';
+  if(ci && ci.phase === 'menstrual' && tier === 'push') tier = 'build';
+  return {v, tier, mood, ci, cMod};
+}
+function candidates(){
+  const {tier, ci} = capacity();
+  const ti = TIERS.indexOf(tier);
+  let pool = W.filter(w => w.min <= S.minutes);
+  if(ci && ci.phase === 'menstrual') pool = pool.filter(w => w.g !== 'cardio' || w.t === 'steady' || w.t === 'restore');
+  let list = pool.filter(w => TIERS.indexOf(w.t) === ti);
+  if(S.goal !== 'any'){
+    const g = list.filter(w => w.g === S.goal);
+    if(g.length) list = g;
+  }
+  if(!list.length) list = pool.filter(w => Math.abs(TIERS.indexOf(w.t) - ti) <= 1);
+  if(!list.length) list = pool;
+  if(!list.length) list = W.filter(w => w.min <= 10);
+  return list.sort((a,b)=> b.min - a.min);
+}
+const pick = () => { const c = candidates(); return c[S.altIdx % c.length]; };
+const mins = w => Math.round(w.bl.reduce((s,x)=>s+Number(x.s),0)/60);
+
+function whyLine(){
+  const {mood, ci, cMod} = capacity();
+  const bits = ['energy ' + S.energy + '/5', S.minutes + ' minutes', mood.l.toLowerCase()];
+  if(ci && cMod !== 0) bits.push(PHASE[ci.phase].l.toLowerCase() + ' phase, day ' + ci.day);
+  return 'From ' + bits.slice(0,-1).join(', ') + ' and ' + bits[bits.length-1] + '.';
+}
+function eatPick(){
+  const budget = S.minutes <= 10 ? 10 : S.minutes <= 20 ? 15 : 20;
+  const list = MEALS.filter(m => m.mins <= budget);
+  const ci = cycleInfo();
+  if(ci && ci.phase === 'menstrual'){
+    const iron = list.filter(m => /chana|sprout|soya|khichdi/i.test(m.n));
+    if(iron.length) return iron[0];
+  }
+  const want = list.slice().sort((a,b)=> b.p - a.p);
+  return want[S.altIdx % Math.max(1, want.length)] || MEALS[0];
+}
+function recoverPick(){
+  const m = S.mood;
+  if(m === 'tense' || m === 'wired') return {k:'calm', n:'Calm 4·7·8, six rounds', s:'Long exhale pulls the whole system down a notch.'};
+  if(m === 'drained' || m === 'flat') return {k:'lift', n:'Study Boost, then journal', s:'Sharp exhales to clear the fog, then one prompt answered badly is fine.'};
+  return {k:'box', n:'Steady Focus, six rounds', s:'Even in, even out. Two minutes and you\'re level.'};
+}
+
+/* ---------------- paint: home ---------------- */
+function paintChecks(){
+  const er = $('#energyRow'); er.textContent = '';
+  for(let i=1;i<=5;i++){
+    const btn = el('button','bat','<span>'+i+'</span>');
+    btn.type='button'; btn.setAttribute('aria-pressed', S.energy===i);
+    btn.setAttribute('aria-label','Energy '+i+' of 5');
+    btn.onclick = ()=>{ S.energy=i; save(); paintChecks(); paintHome(); };
+    er.appendChild(btn);
+  }
+  const tr = $('#timeRow'); tr.textContent='';
+  TIMES.forEach(t=>{
+    const btn = el('button','chip', t + ' min'); btn.type='button';
+    btn.setAttribute('aria-pressed', S.minutes===t);
+    btn.onclick = ()=>{ S.minutes=t; S.altIdx=0; save(); paintChecks(); paintHome(); };
+    tr.appendChild(btn);
+  });
+  const mr = $('#moodRow'); mr.textContent='';
+  MOODS.forEach(m=>{
+    const btn = el('button','chip', m.l); btn.type='button';
+    btn.setAttribute('aria-pressed', S.mood===m.k);
+    btn.onclick = ()=>{ S.mood=m.k; save(); paintChecks(); paintHome(); };
+    mr.appendChild(btn);
+  });
+  const gr = $('#goalRow'); gr.textContent='';
+  GOALS.forEach(g=>{
+    const btn = el('button','chip', g.l); btn.type='button';
+    btn.setAttribute('aria-pressed', S.goal===g.k);
+    btn.onclick = ()=>{ S.goal=g.k; S.altIdx=0; save(); paintChecks(); paintHome(); };
+    gr.appendChild(btn);
+  });
+}
+function planRow(kind, cls, icon, title, sub, go){
+  const r = el('button','prow'); r.type='button';
+  r.innerHTML = '<span class="dot d-'+cls+'">'+svg(icon,18)+'</span>' +
+    '<span class="bd"><span class="kind">'+kind+'</span><span class="ttl">'+title+'</span><p class="sub">'+sub+'</p></span>' +
+    '<span class="go">'+svg(ICON.chev,18)+'</span>';
+  r.onclick = go; return r;
+}
+function paintHome(){
+  const c = capacity();
+  $('#capNum').textContent = c.v;
+  $('#capTier').textContent = c.tier;
+  const circ = 2*Math.PI*35;
+  $('#capArc').setAttribute('stroke-dasharray', circ);
+  $('#capArc').setAttribute('stroke-dashoffset', circ * (1 - c.v/100));
+  $('#capWhy').textContent = whyLine();
+
+  const w = pick(), meal = eatPick(), rec = recoverPick();
+  const host = $('#planRows'); host.textContent='';
+  host.appendChild(planRow('Move', 'move', ICON.move, w.name, mins(w) + ' min · ' + w.note, ()=>go('move')));
+  host.appendChild(planRow('Eat', 'eat', ICON.eat, meal.n, meal.mins + ' min · about ₹' + meal.r + ' · ' + meal.p + 'g protein', ()=>go('eat')));
+  host.appendChild(planRow('Grounding', 'recover', ICON.recover, rec.n, rec.s, ()=>{ S.breath = rec.k; save(); go('recover'); }));
+  const ci = cycleInfo();
+  if(ci){
+    host.appendChild(planRow('Cycle', 'cycle', ICON.cycle, PHASE[ci.phase].l + ' phase, day ' + ci.day,
+      PHASE[ci.phase].tips[0], ()=>go('cycle')));
+  }
+
+  const nudges = {
+    restore:'If even this is too much, do the first block only and stop. A ten-minute walk and a real meal is a complete day.',
+    steady:'If the session gets cut short, keep the warm-up and the food. Those two carry most of the benefit.',
+    build:'Good day to bank one. If something gets dropped later, let it be the stretch and not the meal.',
+    push:'High capacity days are where people overreach. Finish able to do it again tomorrow.'
+  };
+  $('#nudgeTxt').textContent = nudges[c.tier];
+}
+
+/* ---------------- paint: move ---------------- */
+function wkCard(w){
+  const n = el('div','wk');
+  n.innerHTML = '<h3>'+w.name+'</h3><p class="muted" style="margin-top:4px">'+w.note+'</p>' +
+    '<div class="meta"><span class="tag hot">'+mins(w)+' min</span><span class="tag">'+w.t+'</span><span class="tag">'+w.g+'</span><span class="tag">'+w.bl.length+' blocks</span></div>';
+  const ul = el('ul','blocks');
+  w.bl.forEach(x=>{
+    const li = el('li');
+    const m = Math.floor(x.s/60), s = x.s%60;
+    li.innerHTML = '<span class="t">'+(m? m+'m' : '')+(s? ' '+s+'s' : '')+'</span>' +
+      '<span class="n">'+x.n+'<span class="c">'+x.c+'</span></span>';
+    ul.appendChild(li);
+  });
+  n.appendChild(ul); return n;
+}
+function paintMove(){
+  const w = pick(), c = capacity(), ci = c.ci;
+  $('#mE').textContent = S.energy;
+  $('#mT').textContent = S.minutes;
+  $('#mC').textContent = ci ? ' · ' + PHASE[ci.phase].l.toLowerCase() + ' phase' : '';
+  const host = $('#wkHost'); host.textContent=''; host.appendChild(wkCard(w));
+
+  const alts = candidates().filter(x=>x.id!==w.id).slice(0,4);
+  const list = $('#altList'); list.textContent='';
+  if(!alts.length) list.appendChild(el('p','tiny','Nothing else fits inside ' + S.minutes + ' minutes right now. Give yourself more time to see more.'));
+  alts.forEach(a=>{
+    list.appendChild(planRow(mins(a) + ' min · ' + a.g, 'move', ICON.move, a.name, a.note, ()=>{
+      const idx = candidates().findIndex(x=>x.id===a.id);
+      S.altIdx = idx < 0 ? 0 : idx; save(); paintMove(); paintHome(); window.scrollTo({top:0,behavior:'smooth'});
+    }));
+  });
+}
+
+/* ---------------- player ---------------- */
+let P = null;
+function startPlayer(w){
+  P = {w, i:0, left:Number(w.bl[0].s), paused:false, t:null};
+  $('#player').hidden = false;
+  document.body.style.overflow = 'hidden';
+  paintPlayer();
+  P.t = setInterval(tick, 1000);
+}
+function tick(){
+  if(!P || P.paused) return;
+  P.left--;
+  if(P.left <= 0){
+    if(P.i >= P.w.bl.length - 1){ finishPlayer(true); return; }
+    P.i++; P.left = Number(P.w.bl[P.i].s);
+  }
+  paintPlayer();
+}
+function paintPlayer(){
+  if(!P) return;
+  const bl = P.w.bl[P.i];
+  $('#pstep').textContent = 'Block ' + (P.i+1) + ' of ' + P.w.bl.length + ' · ' + P.w.name;
+  $('#pname').textContent = bl.n;
+  $('#pcue').textContent = bl.c;
+  const m = String(Math.floor(P.left/60)).padStart(2,'0'), s = String(P.left%60).padStart(2,'0');
+  $('#pclock').textContent = m + ':' + s;
+  const d = $('#pdots'); d.textContent='';
+  P.w.bl.forEach((_,i)=>{
+    const t = el('i'); if(i < P.i) t.className='on'; if(i === P.i) t.className='now';
+    d.appendChild(t);
+  });
+  $('#pPause').textContent = P.paused ? 'Resume' : 'Pause';
+}
+function finishPlayer(done){
+  if(P && P.t) clearInterval(P.t);
+  const name = P ? P.w.name : '';
+  P = null;
+  $('#player').hidden = true;
+  document.body.style.overflow = '';
+  if(done){
+    S.counters.moves++; save();
+    award(25, name + ' done.');
+    paintRewards();
+  }
+}
+
+/* ---------------- paint: eat ---------------- */
+function foodTotals(){
+  return S.food.reduce((a,f)=>({k:a.k+f.k, p:a.p+f.p, r:a.r+f.r}), {k:0,p:0,r:0});
+}
+function paintEat(){
+  const t = foodTotals();
+  const kGoal = 2000, pGoal = 60, rGoal = 250;
+  $('#kcalTxt').textContent = t.k + ' / ' + kGoal + ' kcal';
+  $('#protTxt').textContent = t.p + ' / ' + pGoal + ' g';
+  $('#costTxt').textContent = '₹' + t.r + ' of ₹' + rGoal;
+  $('#kcalFill').style.width = Math.min(100, t.k/kGoal*100) + '%';
+  $('#protFill').style.width = Math.min(100, t.p/pGoal*100) + '%';
+  $('#costFill').style.width = Math.min(100, t.r/rGoal*100) + '%';
+
+  const ll = $('#loggedList'); ll.textContent='';
+  if(!S.food.length) ll.appendChild(el('li','', '<span style="color:var(--fg-3)">Nothing logged yet today</span>'));
+  S.food.forEach((f,i)=>{
+    const li = el('li'); li.innerHTML = '<span>'+f.n+'</span>';
+    const x = el('button','', '×'); x.type='button'; x.setAttribute('aria-label','Remove '+f.n);
+    x.onclick = ()=>{ S.food.splice(i,1); save(); paintEat(); };
+    li.appendChild(x); ll.appendChild(li);
+  });
+
+  const need = Math.min(16, Math.ceil(S.goalMl / S.glassMl));
+  const have = Math.round(S.waterMl / S.glassMl);
+  const L = ml => (ml/1000).toFixed(ml % 1000 === 0 ? 1 : 2).replace(/0$/,'0') + ' L';
+  $('#waterTot').textContent = (S.waterMl/1000).toFixed(2).replace(/\.?0+$/,'') + ' L of ' + (S.goalMl/1000) + ' L';
+  const wr = $('#waterRow'); wr.textContent='';
+  for(let i=1;i<=need;i++){
+    const g = el('button','glass' + (i<=have?' on':'')); g.type='button';
+    g.setAttribute('aria-label', 'Glass ' + i + ' of ' + need + ', ' + S.glassMl + ' ml each');
+    g.title = (i*S.glassMl) + ' ml';
+    g.onclick = ()=>{
+      const hit = (have===i) ? (i-1) : i;
+      const was = S.waterMl;
+      S.waterMl = hit * S.glassMl;
+      if(was < S.goalMl && S.waterMl >= S.goalMl){ S.counters.water++; award(5, 'Hit ' + (S.goalMl/1000) + ' L.'); }
+      save(); paintEat();
+    };
+    wr.appendChild(g);
+  }
+  $('#waterNote').textContent = need + ' glasses of ' + S.glassMl + ' ml makes ' +
+    ((need*S.glassMl)/1000).toFixed(2).replace(/\.?0+$/,'') + ' L. Guides put total daily water near 2.7 L for women and 3.7 L for men — but roughly a fifth of that comes from food, so this target counts only what you drink.';
+  const gr = $('#glassRow'); gr.textContent='';
+  [200,250,300,500].forEach(ml=>{
+    const b = el('button','chip', ml + ' ml'); b.type='button';
+    b.setAttribute('aria-pressed', S.glassMl===ml);
+    b.onclick = ()=>{ S.glassMl = ml; save(); paintEat(); };
+    gr.appendChild(b);
+  });
+  const gl = $('#goalRow'); gl.textContent='';
+  [2000,2500,3000,3500].forEach(ml=>{
+    const b = el('button','chip', (ml/1000) + ' L goal'); b.type='button';
+    b.setAttribute('aria-pressed', S.goalMl===ml);
+    b.onclick = ()=>{ S.goalMl = ml; save(); paintEat(); };
+    gl.appendChild(b);
+  });
+
+  const dr = $('#dietRow'); dr.textContent='';
+  DIETS.forEach(d=>{
+    const b = el('button','chip', d.l); b.type='button';
+    b.setAttribute('aria-pressed', S.diet===d.k);
+    b.onclick = ()=>{ S.diet = d.k; save(); paintEat(); };
+    dr.appendChild(b);
+  });
+
+  const q = ($('#foodQ').value || '').toLowerCase().trim();
+  const mine = (S.myFoods || []).map(f => Object.assign({}, f, {mine:true}));
+  const all = mine.concat(FOOD);
+  const shown = all.filter(f => (S.diet==='all' || f.t===S.diet || f.mine) && (!q || f.n.toLowerCase().includes(q)));
+  const fl = $('#foodList'); fl.textContent='';
+  shown.slice(0, q ? 14 : 8).forEach(f=>{
+    const li = el('li');
+    li.innerHTML = foodThumb(f) + '<span class="fn">' + f.n + (f.mine ? '<span class="mine">yours</span>' : '') +
+      '<small>'+f.k+' kcal · '+f.p+'g protein · ₹'+f.r+'</small></span>';
+    if(f.mine){
+      const d = el('button','del','×'); d.type='button'; d.setAttribute('aria-label','Delete '+f.n);
+      d.onclick = ()=>{
+        S.myFoods = (S.myFoods||[]).filter(x => x.n !== f.n);
+        save(); paintEat(); toast(f.n + ' removed from your list.');
+      };
+      li.appendChild(d);
+    }
+    const a = el('button','add','+'); a.type='button'; a.setAttribute('aria-label','Log '+f.n);
+    a.onclick = ()=>{
+      S.food.push({n:f.n, k:f.k, p:f.p, r:f.r}); S.counters.meals++; save(); paintEat(); paintRewards();
+      award(5, f.n + ' logged.');
+    };
+    li.appendChild(a); fl.appendChild(li);
+  });
+  if(!fl.children.length) fl.appendChild(el('li','', '<span class="fn" style="color:var(--fg-3)">No match here. Add it yourself below — it saves for next time.</span>'));
+
+  const budget = S.minutes <= 10 ? 10 : S.minutes <= 20 ? 15 : 20;
+  $('#mealWhy').textContent = 'You said ' + S.minutes + ' minutes today, so nothing here takes more than ' + budget + ' to cook.';
+  const ml = $('#mealList'); ml.textContent='';
+  MEALS.filter(m=>m.mins<=budget).forEach(m=>{
+    const d = el('div','meal');
+    d.innerHTML = foodThumb({n:m.n, t:/chicken|tandoori|fish|mutton/i.test(m.n) ? 'nonveg' : /egg|omelette/i.test(m.n) ? 'egg' : 'veg'}) +
+      '<span class="bd" style="flex:1;min-width:0">' +
+      '<b style="font-size:14px">'+m.n+'</b> <span class="tiny" style="display:inline">· '+m.mins+' min · ₹'+m.r+' · '+m.p+'g protein</span>' +
+      '<p class="muted" style="margin-top:3px">'+m.how+'</p></span>';
+    ml.appendChild(d);
+  });
+}
+
+/* ---------------- paint: recover ---------------- */
+let B = null;
+function paintRecover(){
+  const br = $('#breathRow'); br.textContent='';
+  Object.keys(BREATHS).forEach(k=>{
+    const btn = el('button','chip', BREATHS[k].l); btn.type='button';
+    btn.setAttribute('aria-pressed', S.breath===k);
+    btn.onclick = ()=>{ S.breath=k; save(); paintRecover(); };
+    br.appendChild(btn);
+  });
+  $('#breathNote').textContent = BREATHS[S.breath].note;
+
+  const ent = $('#entries'); ent.textContent='';
+  S.journal.slice(-3).reverse().forEach(j=>{
+    const d = el('div','entry');
+    d.innerHTML = '<span class="when">'+j.d+'</span>' + j.t.replace(/</g,'&lt;');
+    ent.appendChild(d);
+  });
+}
+
+function runBreath(){
+  if(B){ stopBreath(); return; }
+  const pat = BREATHS[S.breath], seq = pat.seq;
+  let round = 0, i = 0;
+  const orb = $('#orb'), txt = $('#orbTxt');
+  $('#breathBtn').textContent = 'Stop';
+  const step = ()=>{
+    if(round >= 6){ stopBreath(true); return; }
+    const [label, secs] = seq[i];
+    txt.textContent = label;
+    orb.style.transitionDuration = secs + 's';
+    orb.style.transform = label === 'Inhale' ? 'scale(1)' : label === 'Exhale' ? 'scale(.62)' : orb.style.transform || 'scale(1)';
+    B.to = setTimeout(()=>{
+      i++; if(i >= seq.length){ i = 0; round++; }
+      step();
+    }, secs*1000);
+  };
+  B = {to:null};
+  step();
+}
+function stopBreath(done){
+  if(B && B.to) clearTimeout(B.to);
+  B = null;
+  const orb = $('#orb');
+  orb.style.transitionDuration = '.8s';
+  orb.style.transform = 'scale(.62)';
+  $('#orbTxt').textContent = done ? 'Done' : 'Ready';
+  $('#breathBtn').textContent = 'Start — 6 rounds';
+  if(done){ S.counters.breaths++; save(); award(10,'Six rounds of breathing.'); paintRewards(); }
+}
+
+/* ---------------- paint: cycle ---------------- */
+function paintCycle(){
+  $('#cycToggle').setAttribute('aria-pressed', S.cycle.on);
+  $('#cycBody').hidden = !S.cycle.on;
+  $('#cStart').value = S.cycle.start;
+  $('#cLen').value = S.cycle.len;
+  $('#cPer').value = S.cycle.per;
+  $('#sampleNote').textContent = S.demo
+    ? 'These are sample dates so the phase logic has something to run on. Replace them with yours.'
+    : 'Used only on this device. Nothing leaves the page.';
+  const ci = cycleInfo();
+  if(!ci) return;
+  $('#phaseName').textContent = PHASE[ci.phase].l + ' phase, day ' + ci.day;
+  $('#phaseLine').textContent = 'Day ' + ci.day + ' of a ' + ci.len + '-day cycle. Ovulation estimated around day ' + ci.ov + '.';
+  const pb = $('#phaseBar'); pb.textContent='';
+  ['menstrual','follicular','ovulatory','luteal'].forEach(p=>{
+    const d = el('div', p===ci.phase ? 'on' : '');
+    d.innerHTML = '<div class="pb"></div><span class="pl">'+PHASE[p].s+'</span>';
+    pb.appendChild(d);
+  });
+  $('#nextLine').textContent = ci.toNext === 1 ? 'Next period expected tomorrow.' : 'Next period expected in about ' + ci.toNext + ' days.';
+  const tp = $('#phaseTips'); tp.textContent='';
+  PHASE[ci.phase].tips.forEach(t=>{
+    const d = el('div','meal');
+    d.innerHTML = '<span class="cost" style="color:var(--cycle)">·</span><span style="flex:1;min-width:0">'+t+'</span>';
+    tp.appendChild(d);
+  });
+}
+
+/* ---------------- paint: rewards ---------------- */
+function paintPoints(){
+  $('#ptsTop').textContent = S.points;
+  $('#ptsBig').textContent = S.points;
+}
+function paintRewards(){
+  paintPoints();
+  $('#ptsSince').textContent = S.demo ? 'including a sample week' : 'earned so far';
+  const sr = $('#streakRow'); sr.textContent='';
+  const names = ['M','T','W','T','F','S','S'];
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  for(let i=0;i<7;i++){
+    const on = i <= todayIdx && i > todayIdx - S.streakDays;
+    const t = el('i', on?'on':'', names[i]);
+    sr.appendChild(t);
+  }
+  $('#streakTxt').textContent = S.streakDays + ' days in a row. A day counts when you finish any one thing — a session, a breath set, or a logged meal.';
+
+  const cl = $('#chalList'); cl.textContent='';
+  CHALLENGES.forEach(c=>{
+    const have = Math.min(S.counters[c.k] || 0, c.goal);
+    const d = el('div','chal' + (have>=c.goal ? ' done':''));
+    d.innerHTML = '<div class="top"><b>'+c.l+'</b><span>'+have+'/'+c.goal+'</span></div>' +
+      '<div class="track"><div class="fill" style="width:'+(have/c.goal*100)+'%"></div></div>';
+    cl.appendChild(d);
+  });
+
+  const ul = $('#unlockList'); ul.textContent='';
+  const next = UNLOCKS.find(u=>S.points < u.at);
+  $('#nextUnlock').textContent = next ? (next.at - S.points) + ' points to “' + next.n + '”.' : 'Everything is unlocked. The habit is the reward now.';
+  UNLOCKS.forEach(u=>{
+    const got = S.points >= u.at;
+    const d = el('div','unlock' + (got?' got':''));
+    d.innerHTML = '<span class="lk">'+(got?'✓':u.at)+'</span><span style="flex:1;min-width:0"><span class="nm">'+u.n+'</span><p class="tiny" style="margin-top:2px">'+u.d+'</p></span>';
+    ul.appendChild(d);
+  });
+}
+
+/* ---------------- nav ---------------- */
+const VIEWS = [
+  {k:'home', l:'Today', i:ICON.home},
+  {k:'move', l:'Move', i:ICON.move},
+  {k:'eat', l:'Eat', i:ICON.eat},
+  {k:'recover', l:'Grounding', i:ICON.recover},
+  {k:'cycle', l:'Cycle', i:ICON.cycle},
+  {k:'rewards', l:'Points', i:ICON.reward}
+];
+let cur = 'home';
+function go(k){
+  cur = k;
+  VIEWS.forEach(v=>{ $('#v-'+v.k).hidden = v.k !== k; });
+  [...$('#nav').children].forEach(btn => btn.setAttribute('aria-selected', btn.dataset.k === k));
+  if(k==='home') paintHome();
+  if(k==='move') paintMove();
+  if(k==='eat') paintEat();
+  if(k==='recover') paintRecover();
+  if(k==='cycle') paintCycle();
+  if(k==='rewards') paintRewards();
+  window.scrollTo({top:0});
+}
+function buildNav(){
+  const n = $('#nav'); n.textContent='';
+  VIEWS.forEach(v=>{
+    const btn = el('button','', svg(v.i,21) + '<span>'+v.l+'</span>');
+    btn.type='button'; btn.dataset.k = v.k; btn.setAttribute('role','tab');
+    btn.setAttribute('aria-selected', v.k===cur);
+    btn.onclick = ()=>go(v.k);
+    n.appendChild(btn);
+  });
+}
+
+/* ---------------- wire up ---------------- */
+function boot(){
+  const now = new Date();
+  $('#today').textContent = now.toLocaleDateString(undefined,{weekday:'long', day:'numeric', month:'long'});
+  const h = now.getHours();
+  $('#greet').textContent = h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Winding down';
+
+  buildNav(); paintChecks(); paintHome(); paintPoints();
+
+  $('#buildBtn').onclick = ()=>{ S.altIdx = 0; save(); paintHome(); toast('Plan rebuilt for today.'); };
+  $('#swapBtn').onclick = ()=>{ S.altIdx++; save(); paintMove(); paintHome(); };
+  $('#startBtn').onclick = ()=> startPlayer(pick());
+  $('#pPause').onclick = ()=>{ if(P){ P.paused = !P.paused; paintPlayer(); } };
+  $('#pSkip').onclick = ()=>{
+    if(!P) return;
+    if(P.i >= P.w.bl.length - 1){ finishPlayer(true); return; }
+    P.i++; P.left = Number(P.w.bl[P.i].s); paintPlayer();
+  };
+  $('#pEnd').onclick = ()=> finishPlayer(false);
+
+  $('#foodQ').oninput = paintEat;
+  let ownDiet = 'veg';
+  const paintOwnDiet = ()=>{
+    const r = $('#ownDiet'); r.textContent='';
+    DIETS.filter(d=>d.k!=='all').forEach(d=>{
+      const b = el('button','chip', d.l); b.type='button';
+      b.setAttribute('aria-pressed', ownDiet===d.k);
+      b.onclick = ()=>{ ownDiet = d.k; paintOwnDiet(); };
+      r.appendChild(b);
+    });
+  };
+  paintOwnDiet();
+  $('#ownBtn').onclick = ()=>{ $('#ownForm').hidden = false; $('#ownBtn').hidden = true; $('#ownName').focus(); };
+  $('#ownCancel').onclick = ()=>{ $('#ownForm').hidden = true; $('#ownBtn').hidden = false; };
+  $('#ownSave').onclick = ()=>{
+    const n = $('#ownName').value.trim();
+    const k = Math.max(0, Number($('#ownK').value) || 0);
+    const pr = Math.max(0, Number($('#ownP').value) || 0);
+    const r = Math.max(0, Number($('#ownR').value) || 0);
+    if(!n){ toast('Give it a name first.'); $('#ownName').focus(); return; }
+    if(!k){ toast('Add a rough kcal figure.'); $('#ownK').focus(); return; }
+    const item = {n, k, p:pr, r, t:ownDiet};
+    S.myFoods = (S.myFoods || []).filter(x => x.n !== n).concat([item]).slice(-40);
+    S.food.push({n, k, p:pr, r}); S.counters.meals++;
+    save();
+    $('#ownName').value = ''; $('#ownK').value = ''; $('#ownP').value = ''; $('#ownR').value = '';
+    $('#ownForm').hidden = true; $('#ownBtn').hidden = false;
+    paintEat(); paintRewards(); award(5, n + ' saved and logged.');
+  };
+  $('#photoBtn').onclick = ()=> $('#photoIn').click();
+  $('#photoIn').onchange = e=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const hint = $('#photoHint');
+    hint.hidden = false;
+    hint.textContent = 'Photo attached to today\'s log. Pick the closest match below and the estimate goes in — the picture is the reminder, the numbers come from the list.';
+    $('#foodQ').focus();
+  };
+
+  $('#breathBtn').onclick = runBreath;
+  const newReset = ()=> $('#resetTxt').textContent = RESETS[Math.floor(Math.random()*RESETS.length)];
+  $('#resetNew').onclick = newReset;
+  newReset();
+  const newPrompt = ()=> $('#prompt').textContent = PROMPTS[Math.floor(Math.random()*PROMPTS.length)];
+  newPrompt();
+  $('#jNew').onclick = newPrompt;
+  $('#jSave').onclick = ()=>{
+    const v = $('#jtxt').value.trim();
+    if(!v){ toast('Write a line first.'); return; }
+    S.journal.push({d:TODAY, t:v}); S.counters.journals++; save();
+    $('#jtxt').value = '';
+    paintRecover(); paintRewards(); award(10,'Entry saved.');
+  };
+
+  $('#cycToggle').onclick = ()=>{
+    S.cycle.on = !S.cycle.on; save(); paintCycle(); paintHome();
+    toast(S.cycle.on ? 'Cycle data now shapes your plan.' : 'Cycle tracking off.');
+  };
+  $('#cSave').onclick = ()=>{
+    const d = $('#cStart').value;
+    if(d) S.cycle.start = d;
+    S.cycle.len = Math.max(20, Math.min(45, Number($('#cLen').value) || 28));
+    S.cycle.per = Math.max(2, Math.min(10, Number($('#cPer').value) || 5));
+    S.demo = false; save(); paintCycle(); paintHome(); toast('Dates saved on this device.');
+  };
+
+  $('#resetAll').onclick = ()=>{
+    S = DEFAULT();
+    S.demo = false; S.points = 0; S.streakDays = 1;
+    S.counters = {moves:0, breaths:0, journals:0, meals:0, water:0};
+    S.journal = []; S.food = []; S.waterMl = 0; S.myFoods = []; S.diet = 'all';
+    save(); paintChecks(); paintHome(); paintRewards(); paintRecover(); paintEat(); paintCycle();
+    toast('Cleared. This is day one.');
+  };
+
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && !$('#player').hidden) finishPlayer(false);
+  });
+}
+boot();
+})();
+</script>
